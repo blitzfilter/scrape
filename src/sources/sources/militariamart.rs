@@ -1,7 +1,7 @@
 use crate::item::item::currency::Currency;
 use crate::item::item::item::Item;
 use crate::item::item::itemstate::ItemState;
-use crate::item::item::itemstate::ItemState::{AVAILABLE, LISTED, SOLD};
+use crate::item::item::itemstate::ItemState::{AVAILABLE, LISTED, RESERVED, SOLD};
 use crate::sources::sources::Source;
 use reqwest::Client;
 use scraper::{ElementRef, Html, Selector};
@@ -19,11 +19,22 @@ impl Militariamart {
 }
 
 impl Source for Militariamart {
-    async fn gather(&self) -> Result<Vec<Item>, Box<dyn Error>> {
-        let client = Client::new();
+    async fn gather(&self, client: &Client) -> Result<Vec<Item>, Box<dyn Error>> {
+        let mut all_items = Vec::new();
+        for page in 1..=1 {
+            let items = self.gather_page(page, client).await?;
+            all_items.extend(items);
+        }
+        Ok(all_items)
+    }
 
+    async fn gather_page(
+        &self,
+        page_num: i16,
+        client: &Client,
+    ) -> Result<Vec<Item>, Box<dyn Error>> {
         let html = client
-            .get(format!("{}shop.php?pg=53", &self.base_url))
+            .get(format!("{}shop.php?pg={}", &self.base_url, page_num))
             .send()
             .await?
             .text()
@@ -33,7 +44,7 @@ impl Source for Militariamart {
             .select(&Selector::parse("div.shopitem > div.inner-wrapper").unwrap())
             .map(|shop_item| {
                 let item_id = extract_item_id(shop_item).unwrap();
-                let (state, price) = extract_state_price(shop_item, self.currency);
+                let price = extract_price(shop_item, self.currency);
                 return Item::new(
                     item_id.clone(),
                     extract_name(shop_item).unwrap(),
@@ -45,7 +56,7 @@ impl Source for Militariamart {
                     price,
                     Some(self.currency),
                     None,
-                    state,
+                    extract_state(shop_item).unwrap(),
                     format!("{}shop.php?code={}", &self.base_url, item_id.clone()),
                     extract_image_url(shop_item).map(|relative_image_url| {
                         format!("{}{}", &self.base_url, relative_image_url)
@@ -89,31 +100,47 @@ fn extract_description(shop_item: ElementRef) -> Option<String> {
         .flatten()
 }
 
-fn extract_state_price(shop_item: ElementRef, currency: Currency) -> (ItemState, Option<f32>) {
-    let price_str = shop_item
+fn extract_price(shop_item: ElementRef, currency: Currency) -> Option<f32> {
+    shop_item
         .select(&Selector::parse("div.block-text > div.actioncontainer > p.price").unwrap())
         .next()
         .map(|price_elem| {
-            price_elem.text().next().map(|price_text| {
-                price_text
-                    .replace(&currency.to_string(), "")
-                    .trim()
-                    .to_string()
-            })
+            price_elem
+                .text()
+                .next()
+                .map(|price_text| {
+                    price_text
+                        .replace(&currency.to_string(), "")
+                        .trim()
+                        .parse::<f32>()
+                        .ok()
+                })
+                .flatten()
         })
         .flatten()
-        .unwrap_or("".to_string());
+}
 
-    if price_str.is_empty() {
-        (SOLD, None)
-    } else {
-        let price = price_str.parse::<f32>().ok();
-        if price.is_some() {
-            (AVAILABLE, price)
-        } else {
-            (LISTED, None)
-        }
-    }
+fn extract_state(shop_item: ElementRef) -> Option<ItemState> {
+    let selectors = [
+        "div.block-text > div.actioncontainer > form > button",
+        "div.block-text > div.actioncontainer > form > p",
+    ];
+
+    selectors
+        .iter()
+        .filter_map(|selector_str| {
+            let selector = Selector::parse(selector_str).ok()?;
+            shop_item.select(&selector).next()
+        })
+        .find_map(|state_elem| {
+            state_elem.text().next().map(|state_text| match state_text {
+                "SOLD" => SOLD,
+                "Reserved" => RESERVED,
+                "Add to basket" => AVAILABLE,
+                _ => LISTED,
+            })
+        })
+        .or(Some(LISTED))
 }
 
 fn extract_image_url(shop_item: ElementRef) -> Option<String> {
