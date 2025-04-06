@@ -9,19 +9,15 @@ use std::error::Error;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let century20militaria =
-        Militariamart::new("https://20thcenturymilitaria.com/".to_string(), GBP);
-    let antiquitiesofthereich =
-        Militariamart::new("https://antiquitiesofthereich.com/".to_string(), GBP);
-    let hollandpatch = Militariamart::new("https://hollandpatch.com/".to_string(), EUR);
-    let khakicolonel = Militariamart::new("https://khakicolonel.com/".to_string(), GBP);
+    let hollandpatch = Militariamart::new("https://hollandpatch.com".to_string(), None, EUR);
+    let a2zmilitarycollectables1 = Militariamart::new("https://a2zmilitarycollectables.co.uk".to_string(), Some(1), GBP);
+    let a2zmilitarycollectables2 = Militariamart::new("https://a2zmilitarycollectables.co.uk".to_string(), Some(2), GBP);
     
     // This one is good for testing/demo as they only have a few items
-    let liverpoolmilitaria = Militariamart::new("https://liverpoolmilitaria.com/".to_string(), GBP);
+    let liverpoolmilitaria = Militariamart::new("https://liverpoolmilitaria.com".to_string(), None, GBP);
 
     let client = Client::new();
     let items = liverpoolmilitaria.gather(&client).await?;
-
     let size = items.len();
 
     for item in items {

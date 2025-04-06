@@ -9,12 +9,17 @@ use std::error::Error;
 
 pub struct Militariamart {
     base_url: String,
+    shop_dimension: Option<i8>,
     currency: Currency,
 }
 
 impl Militariamart {
-    pub fn new(base_url: String, currency: Currency) -> Self {
-        Self { base_url, currency }
+    pub fn new(base_url: String, shop_dimension: Option<i8>, currency: Currency) -> Self {
+        Self {
+            base_url,
+            shop_dimension,
+            currency,
+        }
     }
 }
 
@@ -25,7 +30,12 @@ impl Source for Militariamart {
         client: &Client,
     ) -> Result<Vec<Item>, Box<dyn Error>> {
         let html = client
-            .get(format!("{}shop.php?pg={}", &self.base_url, page_num))
+            .get(format!(
+                "{}/shop.php?d={}&pg={}",
+                &self.base_url,
+                &self.shop_dimension.unwrap_or(1),
+                page_num
+            ))
             .send()
             .await?
             .text()
@@ -48,9 +58,9 @@ impl Source for Militariamart {
                     Some(self.currency),
                     None,
                     extract_state(shop_item).unwrap(),
-                    format!("{}shop.php?code={}", &self.base_url, item_id.clone()),
+                    format!("{}/shop.php?code={}", &self.base_url, item_id.clone()),
                     extract_image_url(shop_item).map(|relative_image_url| {
-                        format!("{}{}", &self.base_url, relative_image_url)
+                        format!("{}/{}", &self.base_url, relative_image_url)
                     }),
                 );
             })
