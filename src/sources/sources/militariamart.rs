@@ -19,15 +19,6 @@ impl Militariamart {
 }
 
 impl Source for Militariamart {
-    async fn gather(&self, client: &Client) -> Result<Vec<Item>, Box<dyn Error>> {
-        let mut all_items = Vec::new();
-        for page in 1..=1 {
-            let items = self.gather_page(page, client).await?;
-            all_items.extend(items);
-        }
-        Ok(all_items)
-    }
-
     async fn gather_page(
         &self,
         page_num: i16,
