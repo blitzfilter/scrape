@@ -6,7 +6,7 @@ use crate::sources::sources::Source;
 use reqwest::Client;
 use scraper::{ElementRef, Html, Selector};
 use std::error::Error;
-use std::fmt::format;
+use std::fmt::{Debug, format};
 
 pub struct Militariamart {
     base_url: String,
@@ -34,6 +34,7 @@ impl Source for Militariamart {
             .select(&Selector::parse("div.shopitem > div.inner-wrapper").unwrap())
             .map(|shop_item| {
                 let item_id = extract_item_id(shop_item).unwrap();
+                let price = extract_price(shop_item, self.currency);
                 return Item::new(
                     item_id.clone(),
                     extract_name(shop_item).unwrap(),
@@ -41,8 +42,8 @@ impl Source for Militariamart {
                     None,
                     None,
                     None,
-                    None,
-                    None,
+                    price,
+                    price,
                     Some(self.currency),
                     None,
                     extract_state(shop_item).unwrap(),
@@ -86,6 +87,26 @@ fn extract_description(shop_item: ElementRef) -> Option<String> {
         .select(&Selector::parse("div.block-text > p.itemDescription").unwrap())
         .next()
         .map(|desc_elem| desc_elem.text().next().map(|text| text.trim().to_string()))
+        .flatten()
+}
+
+fn extract_price(shop_item: ElementRef, currency: Currency) -> Option<f32> {
+    shop_item
+        .select(&Selector::parse("div.block-text > div.actioncontainer > p.price").unwrap())
+        .next()
+        .map(|price_elem| {
+            price_elem
+                .text()
+                .next()
+                .map(|price_text| {
+                    price_text
+                        .replace(&currency.to_string(), "")
+                        .trim()
+                        .parse::<f32>()
+                        .ok()
+                })
+                .flatten()
+        })
         .flatten()
 }
 
