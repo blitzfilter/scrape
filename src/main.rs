@@ -15,9 +15,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
         Militariamart::new("https://antiquitiesofthereich.com/".to_string(), GBP);
     let hollandpatch = Militariamart::new("https://hollandpatch.com/".to_string(), EUR);
     let khakicolonel = Militariamart::new("https://khakicolonel.com/".to_string(), GBP);
+    
+    // This one is good for testing/demo as they only have a few items
+    let liverpoolmilitaria = Militariamart::new("https://liverpoolmilitaria.com/".to_string(), GBP);
 
     let client = Client::new();
-    let items = hollandpatch.gather(&client).await?;
+    let items = liverpoolmilitaria.gather(&client).await?;
 
     let size = items.len();
 
