@@ -1,12 +1,11 @@
 use crate::item::item::currency::Currency;
 use crate::item::item::item::Item;
 use crate::item::item::itemstate::ItemState;
-use crate::item::item::itemtype::ItemType;
+use crate::item::item::itemstate::ItemState::{AVAILABLE, LISTED, SOLD};
 use crate::sources::sources::Source;
 use reqwest::Client;
 use scraper::{ElementRef, Html, Selector};
 use std::error::Error;
-use std::fmt::{Debug, format};
 
 pub struct Militariamart {
     base_url: String,
@@ -24,7 +23,7 @@ impl Source for Militariamart {
         let client = Client::new();
 
         let html = client
-            .get(format!("{}shop.php?pg=10", &self.base_url))
+            .get(format!("{}shop.php?pg=53", &self.base_url))
             .send()
             .await?
             .text()
@@ -34,7 +33,7 @@ impl Source for Militariamart {
             .select(&Selector::parse("div.shopitem > div.inner-wrapper").unwrap())
             .map(|shop_item| {
                 let item_id = extract_item_id(shop_item).unwrap();
-                let price = extract_price(shop_item, self.currency);
+                let (state, price) = extract_state_price(shop_item, self.currency);
                 return Item::new(
                     item_id.clone(),
                     extract_name(shop_item).unwrap(),
@@ -46,7 +45,7 @@ impl Source for Militariamart {
                     price,
                     Some(self.currency),
                     None,
-                    extract_state(shop_item).unwrap(),
+                    state,
                     format!("{}shop.php?code={}", &self.base_url, item_id.clone()),
                     extract_image_url(shop_item).map(|relative_image_url| {
                         format!("{}{}", &self.base_url, relative_image_url)
@@ -90,24 +89,31 @@ fn extract_description(shop_item: ElementRef) -> Option<String> {
         .flatten()
 }
 
-fn extract_price(shop_item: ElementRef, currency: Currency) -> Option<f32> {
-    shop_item
+fn extract_state_price(shop_item: ElementRef, currency: Currency) -> (ItemState, Option<f32>) {
+    let price_str = shop_item
         .select(&Selector::parse("div.block-text > div.actioncontainer > p.price").unwrap())
         .next()
         .map(|price_elem| {
-            price_elem
-                .text()
-                .next()
-                .map(|price_text| {
-                    price_text
-                        .replace(&currency.to_string(), "")
-                        .trim()
-                        .parse::<f32>()
-                        .ok()
-                })
-                .flatten()
+            price_elem.text().next().map(|price_text| {
+                price_text
+                    .replace(&currency.to_string(), "")
+                    .trim()
+                    .to_string()
+            })
         })
         .flatten()
+        .unwrap_or("".to_string());
+
+    if price_str.is_empty() {
+        (SOLD, None)
+    } else {
+        let price = price_str.parse::<f32>().ok();
+        if price.is_some() {
+            (AVAILABLE, price)
+        } else {
+            (LISTED, None)
+        }
+    }
 }
 
 fn extract_image_url(shop_item: ElementRef) -> Option<String> {
@@ -117,8 +123,4 @@ fn extract_image_url(shop_item: ElementRef) -> Option<String> {
         .unwrap()
         .attr("src")
         .map(String::from)
-}
-
-fn extract_state(shop_item: ElementRef) -> Option<ItemState> {
-    Some(ItemState::AVAILABLE)
 }

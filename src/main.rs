@@ -1,10 +1,7 @@
 mod item;
 mod sources;
 
-use crate::item::item::item::Item;
-use scraper::selectable::Selectable;
 use std::error::Error;
-use serde::Serialize;
 use crate::item::item::currency::Currency::GBP;
 use crate::sources::sources::militariamart::Militariamart;
 use crate::sources::sources::Source;
