@@ -17,7 +17,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let liverpoolmilitaria = Militariamart::new("https://liverpoolmilitaria.com".to_string(), None, GBP);
 
     let client = Client::new();
-    let items = liverpoolmilitaria.gather(&client).await?;
+    let items = liverpoolmilitaria.gather(&client, None).await?;
     let size = items.len();
 
     for item in items {
