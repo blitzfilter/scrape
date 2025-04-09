@@ -3,8 +3,10 @@ pub mod scrape {
     use reqwest::Client;
     use std::error::Error;
     use std::time::Duration;
+    use async_trait::async_trait;
     use tokio::time::sleep;
 
+    #[async_trait]
     pub trait Scrape {
         async fn gather_page(
             &self,
