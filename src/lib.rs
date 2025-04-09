@@ -8,10 +8,10 @@ pub mod scrape {
 
     #[async_trait]
     pub trait Scrape: Send + Sync {
-        async fn gather_page(
-            &self,
+        async fn gather_page<'a>(
+            &'a self,
             page_num: i16,
-            client: &Client,
+            client: &'a Client,
         ) -> Result<Vec<ItemDiff>, Box<dyn Error + Send + Sync>>;
 
         async fn gather(
