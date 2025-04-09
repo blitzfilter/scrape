@@ -14,9 +14,9 @@ pub mod scrape {
             client: &'a Client,
         ) -> Result<Vec<ItemDiff>, Box<dyn Error + Send + Sync>>;
 
-        async fn gather(
-            &self,
-            client: &Client,
+        async fn gather<'a>(
+            &'a self,
+            client: &'a Client,
             sleep_between_pages_millis: Option<u64>,
         ) -> Result<Vec<ItemDiff>, Box<dyn Error + Send + Sync>> {
             let mut all_items = Vec::new();
