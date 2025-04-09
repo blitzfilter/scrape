@@ -8,15 +8,15 @@ pub mod scrape {
 
     #[async_trait]
     pub trait Scrape: Send + Sync {
-        async fn gather_page<'a>(
-            &'a self,
+        async fn gather_page(
+            &self,
             page_num: i16,
-            client: &'a Client,
+            client: &Client,
         ) -> Result<Vec<ItemDiff>, Box<dyn Error + Send + Sync>>;
 
-        async fn gather<'a>(
-            &'a self,
-            client: &'a Client,
+        async fn gather(
+            &self,
+            client: &Client,
             sleep_between_pages_millis: Option<u64>,
         ) -> Result<Vec<ItemDiff>, Box<dyn Error + Send + Sync>> {
             let mut all_items = Vec::new();
