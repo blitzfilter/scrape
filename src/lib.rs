@@ -1,22 +1,22 @@
-pub mod sources {
-    use crate::item::item::item::Item;
+pub mod scrape {
+    use item::item::ItemDiff;
     use reqwest::Client;
     use std::error::Error;
     use std::time::Duration;
     use tokio::time::sleep;
 
-    pub trait Source {
+    pub trait Scrape {
         async fn gather_page(
             &self,
             page_num: i16,
             client: &Client,
-        ) -> Result<Vec<Item>, Box<dyn Error>>;
+        ) -> Result<Vec<ItemDiff>, Box<dyn Error>>;
 
         async fn gather(
             &self,
             client: &Client,
             sleep_between_pages_millis: Option<u64>,
-        ) -> Result<Vec<Item>, Box<dyn Error>> {
+        ) -> Result<Vec<ItemDiff>, Box<dyn Error>> {
             let mut all_items = Vec::new();
             let mut i: i16 = 1;
             loop {
@@ -34,6 +34,4 @@ pub mod sources {
             Ok(all_items)
         }
     }
-
-    pub(crate) mod militariamart;
 }
