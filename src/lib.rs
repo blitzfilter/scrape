@@ -7,7 +7,7 @@ pub mod scrape {
     use tokio::time::sleep;
 
     #[async_trait]
-    pub trait Scrape {
+    pub trait Scrape: Send + Sync {
         async fn gather_page(
             &self,
             page_num: i16,
