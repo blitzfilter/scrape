@@ -12,13 +12,13 @@ pub mod scrape {
             &self,
             page_num: i16,
             client: &Client,
-        ) -> Result<Vec<ItemDiff>, Box<dyn Error + Send + Sync>>;
+        ) -> Result<Vec<ItemDiff>, Box<dyn Error + Send + Sync + 'static>>;
 
         async fn gather(
             &self,
             client: &Client,
             sleep_between_pages_millis: Option<u64>,
-        ) -> Result<Vec<ItemDiff>, Box<dyn Error + Send + Sync>> {
+        ) -> Result<Vec<ItemDiff>, Box<dyn Error + Send + Sync + 'static>> {
             let mut all_items = Vec::new();
             let mut i: i16 = 1;
             loop {
