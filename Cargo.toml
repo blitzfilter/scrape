@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-item = { git = "https://github.com/blitzfilter/item", rev = "22dfd03a18525c9fe0e7de0fbcea97cc6c365a7a" }
+item = { git = "https://github.com/blitzfilter/item", rev = "626ade9e407bdb7d9f0f3429ef162c4631e3d42d" }
 reqwest = { version = "0.12.15", features = ["json"] }
 tokio = { version = "1", features = ["full"] }
 async-trait = { version = "0.1.88" }

@@ -583,7 +583,7 @@ checksum = "469fb0b9cefa57e3ef31275ee7cacb78f2fdca44e4765491884a2b119d4eb130"
 [[package]]
 name = "item"
 version = "0.1.0"
-source = "git+https://github.com/blitzfilter/item?rev=22dfd03a18525c9fe0e7de0fbcea97cc6c365a7a#22dfd03a18525c9fe0e7de0fbcea97cc6c365a7a"
+source = "git+https://github.com/blitzfilter/item?rev=626ade9e407bdb7d9f0f3429ef162c4631e3d42d#626ade9e407bdb7d9f0f3429ef162c4631e3d42d"
 dependencies = [
  "blake3",
  "serde",
