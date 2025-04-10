@@ -8,3 +8,6 @@ item = { git = "https://github.com/blitzfilter/item", branch = "main" }
 reqwest = { version = "0.12.15", features = ["json"] }
 tokio = { version = "1", features = ["full"] }
 async-trait = { version = "0.1.88" }
+strum = { version = "0.27.1" }
+strum_macros = { version = "0.27.1" }
+serde = { version = "1.0.219", features = ["derive"] }
