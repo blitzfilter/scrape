@@ -1262,12 +1262,24 @@ checksum = "469fb0b9cefa57e3ef31275ee7cacb78f2fdca44e4765491884a2b119d4eb130"
 [[package]]
 name = "item-core"
 version = "0.1.0"
-source = "git+https://github.com/blitzfilter/item-core?rev=c14b2b112d86093ffaa83ac1a4798d856b9c73cd#c14b2b112d86093ffaa83ac1a4798d856b9c73cd"
+source = "git+https://github.com/blitzfilter/item-core?rev=fc8bc203cfc21cdbda0704eae2cdd2742dfae2d9#fc8bc203cfc21cdbda0704eae2cdd2742dfae2d9"
 dependencies = [
  "blake3",
  "serde",
  "strum",
  "strum_macros",
+]
+
+[[package]]
+name = "item-read"
+version = "0.1.0"
+source = "git+https://github.com/blitzfilter/item-read?rev=8654c30f5fffa9259d39b413ec92070c9fcd9916#8654c30f5fffa9259d39b413ec92070c9fcd9916"
+dependencies = [
+ "aws-config",
+ "aws-sdk-dynamodb",
+ "item-core",
+ "serde_dynamo",
+ "tokio",
 ]
 
 [[package]]
@@ -1888,6 +1900,7 @@ dependencies = [
  "aws-config",
  "aws-sdk-dynamodb",
  "item-core",
+ "item-read",
  "reqwest",
  "serde",
  "serde_dynamo",
