@@ -1273,24 +1273,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "item-core"
-version = "0.1.0"
-source = "git+https://github.com/blitzfilter/item-core?rev=fc8bc203cfc21cdbda0704eae2cdd2742dfae2d9#fc8bc203cfc21cdbda0704eae2cdd2742dfae2d9"
-dependencies = [
- "blake3",
- "serde",
- "strum",
- "strum_macros",
-]
-
-[[package]]
 name = "item-read"
 version = "0.1.0"
-source = "git+https://github.com/blitzfilter/item-read?rev=8654c30f5fffa9259d39b413ec92070c9fcd9916#8654c30f5fffa9259d39b413ec92070c9fcd9916"
+source = "git+https://github.com/blitzfilter/item-read?rev=1d351cf12a5bc5cf114d3d6da7046ef423cb4ef4#1d351cf12a5bc5cf114d3d6da7046ef423cb4ef4"
 dependencies = [
  "aws-config",
  "aws-sdk-dynamodb",
- "item-core 0.1.0 (git+https://github.com/blitzfilter/item-core?rev=fc8bc203cfc21cdbda0704eae2cdd2742dfae2d9)",
+ "item-core",
  "serde_dynamo",
  "tokio",
 ]
@@ -1921,7 +1910,7 @@ dependencies = [
  "async-trait",
  "aws-config",
  "aws-sdk-dynamodb",
- "item-core 0.1.0 (git+https://github.com/blitzfilter/item-core?rev=a93e4157128cf00ea37402502e7b956977c9c223)",
+ "item-core",
  "item-read",
  "reqwest",
  "serde",

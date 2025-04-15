@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 item-core = { git = "https://github.com/blitzfilter/item-core", rev = "a93e4157128cf00ea37402502e7b956977c9c223" }
-item-read = { git = "https://github.com/blitzfilter/item-read", rev = "8654c30f5fffa9259d39b413ec92070c9fcd9916" }
+item-read = { git = "https://github.com/blitzfilter/item-read", rev = "1d351cf12a5bc5cf114d3d6da7046ef423cb4ef4" }
 reqwest = { version = "0.12.15", features = ["json"] }
 tokio = { version = "1", features = ["full"] }
 async-trait = { version = "0.1.88" }
