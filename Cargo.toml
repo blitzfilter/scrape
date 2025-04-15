@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-item-core = { git = "https://github.com/blitzfilter/item-core", rev = "fc8bc203cfc21cdbda0704eae2cdd2742dfae2d9" }
+item-core = { git = "https://github.com/blitzfilter/item-core", rev = "4ddcaff250d695ed89b33b57ad77606dba7a4403" }
 item-read = { git = "https://github.com/blitzfilter/item-read", rev = "8654c30f5fffa9259d39b413ec92070c9fcd9916" }
 reqwest = { version = "0.12.15", features = ["json"] }
 tokio = { version = "1", features = ["full"] }

@@ -1262,6 +1262,19 @@ checksum = "469fb0b9cefa57e3ef31275ee7cacb78f2fdca44e4765491884a2b119d4eb130"
 [[package]]
 name = "item-core"
 version = "0.1.0"
+source = "git+https://github.com/blitzfilter/item-core?rev=4ddcaff250d695ed89b33b57ad77606dba7a4403#4ddcaff250d695ed89b33b57ad77606dba7a4403"
+dependencies = [
+ "blake3",
+ "serde",
+ "serde_json",
+ "strum",
+ "strum_macros",
+ "time",
+]
+
+[[package]]
+name = "item-core"
+version = "0.1.0"
 source = "git+https://github.com/blitzfilter/item-core?rev=fc8bc203cfc21cdbda0704eae2cdd2742dfae2d9#fc8bc203cfc21cdbda0704eae2cdd2742dfae2d9"
 dependencies = [
  "blake3",
@@ -1277,7 +1290,7 @@ source = "git+https://github.com/blitzfilter/item-read?rev=8654c30f5fffa9259d39b
 dependencies = [
  "aws-config",
  "aws-sdk-dynamodb",
- "item-core",
+ "item-core 0.1.0 (git+https://github.com/blitzfilter/item-core?rev=fc8bc203cfc21cdbda0704eae2cdd2742dfae2d9)",
  "serde_dynamo",
  "tokio",
 ]
@@ -1466,6 +1479,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
 dependencies = [
  "autocfg",
+]
+
+[[package]]
+name = "num_threads"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c7398b9c8b70908f6371f47ed36737907c87c52af34c268fed0bf0ceb92ead9"
+dependencies = [
+ "libc",
 ]
 
 [[package]]
@@ -1899,7 +1921,7 @@ dependencies = [
  "async-trait",
  "aws-config",
  "aws-sdk-dynamodb",
- "item-core",
+ "item-core 0.1.0 (git+https://github.com/blitzfilter/item-core?rev=4ddcaff250d695ed89b33b57ad77606dba7a4403)",
  "item-read",
  "reqwest",
  "serde",
@@ -2168,7 +2190,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a7619e19bc266e0f9c5e6686659d394bc57973859340060a69221e57dbc0c40"
 dependencies = [
  "deranged",
+ "itoa",
+ "libc",
  "num-conv",
+ "num_threads",
  "powerfmt",
  "serde",
  "time-core",
