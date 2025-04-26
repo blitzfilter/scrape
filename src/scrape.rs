@@ -1,3 +1,4 @@
+use crate::scrape::ScrapeError::ReqwestError;
 pub use async_trait::async_trait;
 use item_core::item_data::ItemData;
 use std::error::Error;
@@ -13,7 +14,7 @@ pub enum ScrapeError {
 impl Display for ScrapeError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            ScrapeError::ReqwestError(err) => write!(f, "Reqwest error: {}", err),
+            ReqwestError(err) => write!(f, "Reqwest error: {}", err),
         }
     }
 }
@@ -21,8 +22,14 @@ impl Display for ScrapeError {
 impl Error for ScrapeError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
-            ScrapeError::ReqwestError(err) => Some(err),
+            ReqwestError(err) => Some(err),
         }
+    }
+}
+
+impl From<reqwest::Error> for ScrapeError {
+    fn from(value: reqwest::Error) -> Self {
+        ReqwestError(value)
     }
 }
 
