@@ -1,4 +1,5 @@
 pub mod hash_comparison;
-pub mod scrape;
-pub mod scrape_config;
+pub mod scraper;
+pub mod scraper_config;
+
 pub use item_core;

@@ -1,4 +1,4 @@
-use crate::scrape::ScrapeError::ReqwestError;
+use crate::scraper::ScrapeError::ReqwestError;
 use async_stream::try_stream;
 pub use async_trait::async_trait;
 use futures::stream::BoxStream;
@@ -36,14 +36,14 @@ impl From<reqwest::Error> for ScrapeError {
 }
 
 #[async_trait]
-pub trait Scrape: Send + Sync {
-    async fn gather_page(
+pub trait Scraper: Send + Sync {
+    async fn scrape_page(
         &self,
         page_num: i16,
         client: &reqwest::Client,
     ) -> Result<Vec<ItemData>, ScrapeError>;
 
-    fn gather(
+    fn scrape(
         &self,
         client: &reqwest::Client,
         sleep_between_pages_millis: Option<u64>,
@@ -53,7 +53,7 @@ pub trait Scrape: Send + Sync {
         Box::pin(try_stream! {
             let mut i: i16 = 1;
             loop {
-                let items = self.gather_page(i, &client).await?;
+                let items = self.scrape_page(i, &client).await?;
                 if items.is_empty() {
                     break;
                 }
@@ -71,7 +71,7 @@ pub trait Scrape: Send + Sync {
 
 #[cfg(test)]
 mod tests {
-    use crate::scrape::{Scrape, ScrapeError};
+    use crate::scraper::{Scraper, ScrapeError};
     use async_trait::async_trait;
     use futures::StreamExt;
     use item_core::item_data::ItemData;
@@ -81,8 +81,8 @@ mod tests {
     struct TestScraper {}
 
     #[async_trait]
-    impl Scrape for TestScraper {
-        async fn gather_page(
+    impl Scraper for TestScraper {
+        async fn scrape_page(
             &self,
             page_num: i16,
             _: &Client,
@@ -96,9 +96,9 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn should_gather_all_pages_for_gather() {
+    async fn should_scrape_all_pages_for_scrape() {
         let client = Client::new();
-        let items_count = TestScraper {}.gather(&client, None).count().await;
+        let items_count = TestScraper {}.scrape(&client, None).count().await;
 
         assert_eq!(items_count, 15);
     }
