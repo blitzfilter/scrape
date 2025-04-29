@@ -1,5 +1,7 @@
 use crate::scrape::ScrapeError::ReqwestError;
+use async_stream::try_stream;
 pub use async_trait::async_trait;
+use futures::stream::BoxStream;
 use item_core::item_data::ItemData;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
@@ -41,25 +43,63 @@ pub trait Scrape: Send + Sync {
         client: &reqwest::Client,
     ) -> Result<Vec<ItemData>, ScrapeError>;
 
-    async fn gather(
+    fn gather(
         &self,
         client: &reqwest::Client,
         sleep_between_pages_millis: Option<u64>,
-    ) -> Result<Vec<ItemData>, ScrapeError> {
-        let mut all_items = Vec::new();
-        let mut i: i16 = 1;
-        loop {
-            let items = self.gather_page(i, client).await?;
-            if items.is_empty() {
-                break;
-            } else {
-                all_items.extend(items);
+    ) -> BoxStream<Result<ItemData, ScrapeError>> {
+        let client = client.clone();
+
+        Box::pin(try_stream! {
+            let mut i: i16 = 1;
+            loop {
+                let items = self.gather_page(i, &client).await?;
+                if items.is_empty() {
+                    break;
+                }
+                for item in items {
+                    yield item;
+                }
+                if let Some(duration) = sleep_between_pages_millis {
+                    sleep(Duration::from_millis(duration)).await;
+                }
+                i += 1;
             }
-            if sleep_between_pages_millis.is_some() {
-                sleep(Duration::from_millis(sleep_between_pages_millis.unwrap())).await;
+        })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::scrape::{Scrape, ScrapeError};
+    use async_trait::async_trait;
+    use futures::StreamExt;
+    use item_core::item_data::ItemData;
+    use reqwest::Client;
+    use test_api::generator::Generator;
+
+    struct TestScraper {}
+
+    #[async_trait]
+    impl Scrape for TestScraper {
+        async fn gather_page(
+            &self,
+            page_num: i16,
+            _: &Client,
+        ) -> Result<Vec<ItemData>, ScrapeError> {
+            match page_num {
+                1 => Ok(ItemData::generate_many(10)),
+                2 => Ok(ItemData::generate_many(5)),
+                _ => Ok(vec![]),
             }
-            i += 1;
         }
-        Ok(all_items)
+    }
+
+    #[tokio::test]
+    async fn should_gather_all_pages_for_gather() {
+        let client = Client::new();
+        let items_count = TestScraper {}.gather(&client, None).count().await;
+
+        assert_eq!(items_count, 15);
     }
 }
