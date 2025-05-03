@@ -5,11 +5,12 @@ use std::collections::HashMap;
 pub fn drop_unchanged_diffs(diffs: &mut Vec<ItemData>, item_id_hash_map: &HashMap<String, String>) {
     diffs.retain(|diff| {
         let old_hash = item_id_hash_map.get(diff.item_id.as_str());
-        if old_hash.is_none() {
-            return true;
-        } else {
-            let new_hash = &diff.hash();
-            old_hash.unwrap().ne(new_hash)
+        match old_hash {
+            Some(old_hash) => {
+                let new_hash = &diff.hash();
+                old_hash.ne(new_hash)
+            }
+            None => return true,
         }
     })
 }

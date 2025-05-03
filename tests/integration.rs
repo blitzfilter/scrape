@@ -38,10 +38,7 @@ async fn should_scrape_and_push() {
     }
 
     let scraper = TestScraper {};
-    let scraper_config = ScraperConfig {
-        sleep_between_pages_millis: None,
-        base_url: "http://foo.bar".to_string(),
-    };
+    let scraper_config = ScraperConfig::new("http://foo.bar".to_string());
     let reqwest_client = reqwest::Client::new();
 
     let scrape_and_push_res = scrape_and_push(
@@ -145,10 +142,7 @@ async fn should_scrape_and_push_only_diffs() {
     }
 
     let scraper1 = TestScraper1 {};
-    let scraper_config = ScraperConfig {
-        sleep_between_pages_millis: None,
-        base_url: "https://foo.bar".to_string(),
-    };
+    let scraper_config = ScraperConfig::new("http://foo.bar".to_string());
     let reqwest_client = reqwest::Client::new();
 
     let scrape_and_push_res = scrape_and_push(
@@ -175,10 +169,6 @@ async fn should_scrape_and_push_only_diffs() {
 
     // Only push second item which is new, first one stayed unchanged
     let scraper2 = TestScraper2 {};
-    let scraper_config = ScraperConfig {
-        sleep_between_pages_millis: None,
-        base_url: "https://foo.bar".to_string(),
-    };
     let reqwest_client = reqwest::Client::new();
 
     let scrape_and_push_res = scrape_and_push(
@@ -189,7 +179,7 @@ async fn should_scrape_and_push_only_diffs() {
         get_dynamodb_client().await,
         "http://sqs.eu-central-1.localhost.localstack.cloud:4566/000000000000/write_lambda_queue",
     )
-        .await;
+    .await;
     assert!(scrape_and_push_res.is_ok());
 
     // Wait for SQS and Lambda to work...
