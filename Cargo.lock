@@ -708,9 +708,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.2.20"
+version = "1.2.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04da6a0d40b948dfc4fa8f5bbf402b0fc1a64a28dbf7d12ffd683550f2c1b63a"
+checksum = "8691782945451c1c383942c4874dbe63814f61cb57ef773cda2972682b7bb3c0"
 dependencies = [
  "jobserver",
  "libc",
@@ -2777,7 +2777,7 @@ dependencies = [
 [[package]]
 name = "test-api"
 version = "0.1.0"
-source = "git+https://github.com/blitzfilter/test-api?branch=main#c859f6c10ff0ed22ef5283d29826f8713563b1e1"
+source = "git+https://github.com/blitzfilter/test-api?branch=main#03d103ced7b1ea1d8994d3e2d31225db86c5fe08"
 dependencies = [
  "aws-config",
  "aws-sdk-dynamodb",
@@ -2800,7 +2800,7 @@ dependencies = [
 [[package]]
 name = "test-api-macros"
 version = "0.1.0"
-source = "git+https://github.com/blitzfilter/test-api?branch=main#c859f6c10ff0ed22ef5283d29826f8713563b1e1"
+source = "git+https://github.com/blitzfilter/test-api?branch=main#03d103ced7b1ea1d8994d3e2d31225db86c5fe08"
 dependencies = [
  "quote",
  "syn",
