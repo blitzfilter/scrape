@@ -2416,6 +2416,7 @@ dependencies = [
  "serial_test",
  "test-api",
  "tokio",
+ "tracing",
  "uuid",
 ]
 

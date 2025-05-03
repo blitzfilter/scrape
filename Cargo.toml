@@ -16,6 +16,7 @@ serde_json = { version = "1.0.140" }
 aws-sdk-sqs = { version = "1.65.0" }
 aws-sdk-dynamodb = "1.72.1"
 uuid = { version = "1.16.0", features = ["v4"] }
+tracing = "0.1.41"
 
 [dev-dependencies]
 test-api = { git = "https://github.com/blitzfilter/test-api", branch = "main" }

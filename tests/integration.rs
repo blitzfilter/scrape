@@ -37,14 +37,16 @@ async fn should_scrape_push_sqs_trigger_lambda_insert_dynamodb() {
     let sqs_client = get_sqs_client().await;
     let dynamodb_client = get_dynamodb_client().await;
 
-    scrape_and_push(
+    let scrape_and_push_res = scrape_and_push(
         &scraper,
         &scraper_config,
         &reqwest_client,
         sqs_client,
         dynamodb_client,
+        "http://sqs.eu-central-1.localhost.localstack.cloud:4566/000000000000/write_lambda_queue"
     )
     .await;
+    assert!(scrape_and_push_res.is_ok());
 
     // Wait for SQS and Lambda to work...
     sleep(Duration::from_secs(15)).await;
