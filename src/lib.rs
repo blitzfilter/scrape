@@ -12,6 +12,7 @@ use aws_sdk_sqs::types::SendMessageBatchRequestEntry;
 use futures::StreamExt;
 pub use item_core;
 use item_read::item_hash::get_latest_item_event_hash_map_by_source_id;
+use lambda_runtime::Diagnostic;
 use std::error::Error;
 use std::fmt::Display;
 use tracing::{error, warn};
@@ -45,6 +46,17 @@ impl Error for ScrapePushError {
 impl From<SdkError<QueryError, HttpResponse>> for ScrapePushError {
     fn from(err: SdkError<QueryError, HttpResponse>) -> Self {
         ScrapePushError::QueryItemEventHashesError(err)
+    }
+}
+
+impl Into<Diagnostic> for ScrapePushError {
+    fn into(self) -> Diagnostic {
+        match self {
+            ScrapePushError::QueryItemEventHashesError(err) => Diagnostic {
+                error_type: "QueryItemEventHashesError".to_string(),
+                error_message: err.to_string(),
+            },
+        }
     }
 }
 
