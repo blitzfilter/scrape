@@ -3,6 +3,7 @@ use async_stream::try_stream;
 pub use async_trait::async_trait;
 use futures::stream::BoxStream;
 use item_core::item_data::ItemData;
+use lambda_runtime::Diagnostic;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 use std::time::Duration;
@@ -32,6 +33,17 @@ impl Error for ScrapeError {
 impl From<reqwest::Error> for ScrapeError {
     fn from(value: reqwest::Error) -> Self {
         ReqwestError(value)
+    }
+}
+
+impl Into<Diagnostic> for ScrapeError {
+    fn into(self) -> Diagnostic {
+        match self {
+            ReqwestError(err) => Diagnostic {
+                error_type: "ReqwestError".to_string(),
+                error_message: err.to_string(),
+            },
+        }
     }
 }
 
@@ -71,7 +83,7 @@ pub trait Scraper: Send + Sync {
 
 #[cfg(test)]
 mod tests {
-    use crate::scraper::{Scraper, ScrapeError};
+    use crate::scraper::{ScrapeError, Scraper};
     use async_trait::async_trait;
     use futures::StreamExt;
     use item_core::item_data::ItemData;
