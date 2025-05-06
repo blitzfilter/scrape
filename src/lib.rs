@@ -1,4 +1,5 @@
 pub mod hash_comparison;
+pub mod lambda_handler;
 pub mod scraper;
 pub mod scraper_config;
 
@@ -15,7 +16,7 @@ use item_read::item_hash::get_latest_item_event_hash_map_by_source_id;
 use lambda_runtime::Diagnostic;
 use std::error::Error;
 use std::fmt::Display;
-use tracing::{error, warn};
+use tracing::{error, info, warn};
 use uuid::Uuid;
 
 pub const MAX_SQS_BATCH_SIZE: usize = 10;
@@ -80,7 +81,7 @@ pub async fn scrape_and_push(
                 .filter_map(|diff_result| match diff_result {
                     Ok(diff) => Some(diff),
                     Err(e) => {
-                        warn!("Scrape error: {}", e);
+                        warn!(error = %e, "Scraping item failed.");
                         None
                     }
                 })
@@ -100,8 +101,9 @@ pub async fn scrape_and_push(
                     ),
                     Err(e) => {
                         error!(
-                            "Failed serializing ItemData. ItemData: {:?}. Error: {e}",
-                            &diff
+                            error = %e,
+                            body = &diff
+                            "Serializing ItemData failed.",
                         );
                         None
                     }
@@ -117,16 +119,15 @@ pub async fn scrape_and_push(
 
             match batch_output_res {
                 Ok(batch_output) => {
-                    let failed = batch_output.failed;
-                    let failed_count = failed.len();
-                    if failed_count > 0 {
-                        warn!(
-                            "Sending batch messages was successful, but failed '{failed_count}' messages.",
-                        );
-                        failed.into_iter().for_each(|failure|warn!("Failed message: {:?}", failure));
-                    }
+                    let failures = batch_output.failed;
+                    info!(
+                        successful = batch_output.successful.len(),
+                        failed = failures.len(),
+                        failures = ?failures,
+                        "Successfully sent batch."
+                    );
                 }
-                Err(e) => warn!("Failed message batch: {e}"),
+                Err(e) => warn!(error = %e, "Failed message batch."),
             }
         })
         .await;
