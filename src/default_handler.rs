@@ -4,7 +4,10 @@ use crate::{ScrapePushError, scrape_and_push};
 use lambda_runtime::LambdaEvent;
 use tracing::{error, info};
 
-#[tracing::instrument(skip(event), fields(req_id = %event.context.request_id))]
+#[tracing::instrument(
+    skip(event, reqwest_client, sqs_client, dynamodb_client),
+    fields(req_id = %event.context.request_id))
+]
 pub async fn default_function_handler<T>(
     event: LambdaEvent<ScraperConfig>,
     reqwest_client: &reqwest::Client,
