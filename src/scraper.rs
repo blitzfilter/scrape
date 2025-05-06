@@ -8,6 +8,7 @@ use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 use std::time::Duration;
 use tokio::time::sleep;
+use tracing::info;
 
 #[derive(Debug)]
 pub enum ScrapeError {
@@ -66,7 +67,9 @@ pub trait Scraper: Send + Sync {
             let mut i: i16 = 1;
             loop {
                 let items = self.scrape_page(i, &client).await?;
-                if items.is_empty() {
+                let items_count = items.len();
+                info!(page = i, total = items_count, "Scraped page.");
+                if items_count == 0 {
                     break;
                 }
                 for item in items {
