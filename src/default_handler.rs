@@ -21,8 +21,8 @@ where
     let scraper_cfg = event.payload;
     let scraper: T = scraper_cfg.clone().into();
     info!(
-        scraperConfig =
-            serde_json::to_string(&scraper_cfg).expect("shouldn't fail serializing ScraperConfig"),
+        scraperConfig = serde_json::to_string_pretty(&scraper_cfg)
+            .expect("shouldn't fail serializing ScraperConfig"),
         "Handler invoked."
     );
 
