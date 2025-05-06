@@ -72,9 +72,9 @@ pub async fn scrape_and_push(
     item_write_lambda_q_url: &str,
 ) -> Result<usize, ScrapePushError> {
     let total_sent_count = Arc::new(Mutex::new(0usize));
-    let source_id = format!("source#{}", scraper_config.base_url);
     let item_hashes_map =
-        get_latest_item_event_hash_map_by_source_id(&source_id, dynamodb_client).await?;
+        get_latest_item_event_hash_map_by_source_id(&scraper_config.base_url, dynamodb_client)
+            .await?;
 
     scraper
         .scrape(reqwest_client, scraper_config.sleep_between_pages_millis)

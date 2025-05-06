@@ -29,7 +29,7 @@ async fn should_scrape_and_push() {
             match page_num {
                 1 => Ok(vec![
                     ItemData::generate()
-                        .source_id("http://foo.bar".to_string())
+                        .source_id("https://foo.bar".to_string())
                         .to_owned(),
                 ]),
                 _ => Ok(vec![]),
@@ -38,7 +38,7 @@ async fn should_scrape_and_push() {
     }
 
     let scraper = TestScraper {};
-    let scraper_config = ScraperConfig::new("http://foo.bar".to_string());
+    let scraper_config = ScraperConfig::new("https://foo.bar".to_string());
     let reqwest_client = reqwest::Client::new();
 
     let scrape_and_push_res = scrape_and_push(
@@ -58,7 +58,7 @@ async fn should_scrape_and_push() {
     sleep(Duration::from_secs(15)).await;
 
     let read_res =
-        get_item_event_hashes_by_source_id("http://foo.bar", false, get_dynamodb_client().await)
+        get_item_event_hashes_by_source_id("https://foo.bar", false, get_dynamodb_client().await)
             .await;
     assert!(read_res.is_ok());
 
@@ -144,7 +144,7 @@ async fn should_scrape_and_push_only_diffs() {
     }
 
     let scraper1 = TestScraper1 {};
-    let scraper_config = ScraperConfig::new("http://foo.bar".to_string());
+    let scraper_config = ScraperConfig::new("https://foo.bar".to_string());
     let reqwest_client = reqwest::Client::new();
 
     let scrape_and_push_res = scrape_and_push(
