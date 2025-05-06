@@ -1,5 +1,5 @@
 pub mod hash_comparison;
-pub mod lambda_handler;
+pub mod default_handler;
 pub mod scraper;
 pub mod scraper_config;
 
