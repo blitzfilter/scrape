@@ -16,6 +16,8 @@ use item_read::item_hash::get_latest_item_event_hash_map_by_source_id;
 use lambda_runtime::Diagnostic;
 use std::error::Error;
 use std::fmt::Display;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 use tracing::{error, info, warn};
 use uuid::Uuid;
 
@@ -68,10 +70,12 @@ pub async fn scrape_and_push(
     sqs_client: &aws_sdk_sqs::Client,
     dynamodb_client: &aws_sdk_dynamodb::Client,
     item_write_lambda_q_url: &str,
-) -> Result<(), ScrapePushError> {
+) -> Result<usize, ScrapePushError> {
+    let total_sent_count = Arc::new(Mutex::new(0usize));
     let source_id = format!("source#{}", scraper_config.base_url);
     let item_hashes_map =
         get_latest_item_event_hash_map_by_source_id(&source_id, dynamodb_client).await?;
+
     scraper
         .scrape(reqwest_client, scraper_config.sleep_between_pages_millis)
         .chunks(MAX_SQS_BATCH_SIZE)
@@ -102,7 +106,7 @@ pub async fn scrape_and_push(
                     Err(e) => {
                         error!(
                             error = %e,
-                            body = &diff
+                            body = ?diff,
                             "Serializing ItemData failed.",
                         );
                         None
@@ -120,17 +124,20 @@ pub async fn scrape_and_push(
             match batch_output_res {
                 Ok(batch_output) => {
                     let failures = batch_output.failed;
+                    let successes = batch_output.successful.len();
                     info!(
-                        successful = batch_output.successful.len(),
+                        successful = successes,
                         failed = failures.len(),
                         failures = ?failures,
                         "Successfully sent batch."
                     );
+
+                    *total_sent_count.lock().await += successes;
                 }
                 Err(e) => warn!(error = %e, "Failed message batch."),
             }
         })
         .await;
 
-    Ok(())
+    Ok(*total_sent_count.lock().await)
 }

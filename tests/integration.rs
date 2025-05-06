@@ -51,6 +51,8 @@ async fn should_scrape_and_push() {
     )
     .await;
     assert!(scrape_and_push_res.is_ok());
+    let pushed_count = scrape_and_push_res.unwrap();
+    assert_eq!(pushed_count, 1);
 
     // Wait for SQS and Lambda to work...
     sleep(Duration::from_secs(15)).await;
@@ -155,6 +157,8 @@ async fn should_scrape_and_push_only_diffs() {
     )
     .await;
     assert!(scrape_and_push_res.is_ok());
+    let pushed_count = scrape_and_push_res.unwrap();
+    assert_eq!(pushed_count, 1);
 
     // Wait for SQS and Lambda to work...
     sleep(Duration::from_secs(15)).await;
@@ -181,6 +185,8 @@ async fn should_scrape_and_push_only_diffs() {
     )
     .await;
     assert!(scrape_and_push_res.is_ok());
+    let pushed_count = scrape_and_push_res.unwrap();
+    assert_eq!(pushed_count, 1);
 
     // Wait for SQS and Lambda to work...
     sleep(Duration::from_secs(15)).await;
