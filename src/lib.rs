@@ -1,5 +1,5 @@
-pub mod hash_comparison;
 pub mod default_handler;
+pub mod hash_comparison;
 pub mod scraper;
 pub mod scraper_config;
 
@@ -12,6 +12,7 @@ use aws_sdk_sqs::error::SdkError;
 use aws_sdk_sqs::types::SendMessageBatchRequestEntry;
 use futures::StreamExt;
 pub use item_core;
+use item_core::item_data::ItemData;
 use item_read::item_hash::get_latest_item_event_hash_map_by_source_id;
 use lambda_runtime::Diagnostic;
 use std::error::Error;
@@ -93,51 +94,68 @@ pub async fn scrape_and_push(
 
             drop_unchanged_diffs(&mut diffs, &item_hashes_map);
 
-            let msg_entries = diffs
-                .into_iter()
-                .filter_map(|diff| match serde_json::to_string(&diff) {
-                    Ok(body) => Some(
-                        SendMessageBatchRequestEntry::builder()
-                            .message_body(body)
-                            .id(Uuid::new_v4().to_string())
-                            .build()
-                            .expect("shouldn't fail because 'id' and 'message_body' have been set"),
-                    ),
-                    Err(e) => {
-                        error!(
-                            error = %e,
-                            body = ?diff,
-                            "Serializing ItemData failed.",
-                        );
-                        None
-                    }
-                })
-                .collect::<Vec<_>>();
-
-            let batch_output_res = sqs_client
-                .send_message_batch()
-                .queue_url(item_write_lambda_q_url)
-                .set_entries(Some(msg_entries))
-                .send()
+            if !diffs.is_empty() {
+                push_diffs(
+                    diffs,
+                    sqs_client,
+                    item_write_lambda_q_url,
+                    &total_sent_count,
+                )
                 .await;
-
-            match batch_output_res {
-                Ok(batch_output) => {
-                    let failures = batch_output.failed;
-                    let successes = batch_output.successful.len();
-                    info!(
-                        successful = successes,
-                        failed = failures.len(),
-                        failures = ?failures,
-                        "Successfully sent batch."
-                    );
-
-                    *total_sent_count.lock().await += successes;
-                }
-                Err(e) => warn!(error = %e, "Failed message batch."),
             }
         })
         .await;
 
     Ok(*total_sent_count.lock().await)
+}
+
+async fn push_diffs(
+    diffs: Vec<ItemData>,
+    sqs_client: &aws_sdk_sqs::Client,
+    item_write_lambda_q_url: &str,
+    total_sent_count: &Arc<Mutex<usize>>,
+) {
+    let msg_entries = diffs
+        .into_iter()
+        .filter_map(|diff| match serde_json::to_string(&diff) {
+            Ok(body) => Some(
+                SendMessageBatchRequestEntry::builder()
+                    .message_body(body)
+                    .id(Uuid::new_v4().to_string())
+                    .build()
+                    .expect("shouldn't fail because 'id' and 'message_body' have been set"),
+            ),
+            Err(e) => {
+                error!(
+                    error = %e,
+                    body = ?diff,
+                    "Serializing ItemData failed.",
+                );
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+
+    let batch_output_res = sqs_client
+        .send_message_batch()
+        .queue_url(item_write_lambda_q_url)
+        .set_entries(Some(msg_entries))
+        .send()
+        .await;
+
+    match batch_output_res {
+        Ok(batch_output) => {
+            let failures = batch_output.failed;
+            let successes = batch_output.successful.len();
+            info!(
+                successful = successes,
+                failed = failures.len(),
+                failures = ?failures,
+                "Successfully sent batch."
+            );
+
+            *total_sent_count.lock().await += successes;
+        }
+        Err(e) => warn!(error = %e, "Failed message batch."),
+    }
 }
